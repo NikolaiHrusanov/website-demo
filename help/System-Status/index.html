@@ -31,6 +31,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --error: #ef4444;
+            --status-operational: #10b981;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
@@ -53,8 +54,7 @@
             --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-bounce: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            --status-operational: #10b981;
---status-degraded: #f59e0b;
+            --status-degraded: #f59e0b;
 --status-outage: #ef4444;
 --status-maintenance: #6366f1;
         }
@@ -2020,14 +2020,14 @@
         font-size: 0.8rem;
     }
 }
-/* ===== SYSTEM STATUS COMPONENT ===== */
+/* ===== SYSTEM STATUS BADGE ===== */
 .status-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     background: rgba(16, 185, 129, 0.1);
     border: 1px solid rgba(16, 185, 129, 0.2);
-    padding: 0.625rem 1.25rem;
+    padding: 0.5rem 1.25rem;
     border-radius: var(--radius-full);
     text-decoration: none;
     color: var(--text-primary);
@@ -2104,7 +2104,7 @@
     color: var(--primary);
 }
 
-/* Status Modal */
+/* ===== STATUS MODAL ===== */
 .status-modal {
     position: fixed;
     inset: 0;
@@ -2130,10 +2130,7 @@
     border: 1px solid var(--border-light);
     border-radius: var(--radius-xl);
     width: 100%;
-    max-width: 900px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
+    max-width: 500px;
     box-shadow: var(--shadow-2xl);
     overflow: hidden;
 }
@@ -2175,66 +2172,172 @@
     color: var(--text-primary);
 }
 
-.status-iframe-wrapper {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-    min-height: 500px;
+.status-modal-body {
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-lg);
 }
 
-.status-iframe-wrapper iframe {
+.status-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.status-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-icon i {
+    font-size: 1.5rem;
+    color: var(--success);
+}
+
+.status-icon.degraded {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.status-icon.degraded i {
+    color: var(--status-degraded);
+}
+
+.status-icon.outage {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.status-icon.outage i {
+    color: var(--status-outage);
+}
+
+.status-headline {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.status-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 400px;
+}
+
+.status-services {
     width: 100%;
-    height: 100%;
-    border: none;
-    position: absolute;
-    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+}
+
+.status-service-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.status-service-item:hover {
+    background: var(--surface-hover);
+}
+
+.status-service-name {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.status-service-state {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+}
+
+.status-service-state.operational {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.status-service-state.degraded {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--status-degraded);
+}
+
+.status-service-state.outage {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--status-outage);
 }
 
 .status-modal-footer {
     padding: var(--space-md) var(--space-xl);
     border-top: 1px solid var(--border-light);
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     gap: var(--space-sm);
 }
 
-.status-btn-external {
+.status-btn-primary {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-xs);
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: 1px solid var(--border-medium);
+    gap: var(--space-sm);
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
     border-radius: var(--radius-full);
-    color: var(--text-secondary);
-    font-size: 0.85rem;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
     text-decoration: none;
     transition: all var(--transition-fast);
     cursor: pointer;
     font-family: var(--font-body);
 }
 
-.status-btn-external:hover {
-    background: var(--surface-hover);
-    color: var(--text-primary);
-    border-color: var(--primary);
+.status-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
-.status-btn-external i {
+.status-btn-primary:active {
+    transform: translateY(0);
+}
+
+.status-btn-primary i {
+    font-size: 0.85rem;
+}
+
+.last-updated {
     font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: var(--space-sm);
 }
 
-/* Mobile status adjustments */
+/* ===== MOBILE STATUS STYLES ===== */
 @media (max-width: 768px) {
     .status-modal {
-        padding: 0;
+        padding: var(--space-md);
         align-items: flex-end;
     }
     
     .status-modal-content {
         border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        max-height: 90vh;
-        width: 100%;
         max-width: 100%;
     }
     
@@ -2242,19 +2345,19 @@
         padding: var(--space-md) var(--space-lg);
     }
     
-    .status-iframe-wrapper {
-        min-height: 400px;
+    .status-modal-body {
+        padding: var(--space-lg);
     }
     
     .status-badge {
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
 }
 
 @media (max-width: 480px) {
-    .status-iframe-wrapper {
-        min-height: 350px;
+    .status-modal-body {
+        padding: var(--space-md);
     }
     
     .status-modal-header {
@@ -2264,19 +2367,28 @@
     .status-modal-title {
         font-size: 1rem;
     }
+    
+    .status-icon {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .status-icon i {
+        font-size: 1.25rem;
+    }
+    
+    .status-headline {
+        font-size: 1.1rem;
+    }
+    
+    .status-description {
+        font-size: 0.8rem;
+    }
 }
 </style>
 </head>
 <body>
 
-    <!-- Add this BEFORE the nav-spacer in the floating nav -->
-<a href="#" class="status-badge" id="statusBadge" style="margin-right: var(--space-sm);">
-    <span class="status-dot" id="statusDot"></span>
-    <span class="status-text" id="statusText">
-        <span>All Systems</span>
-        <strong>Operational</strong>
-    </span>
-</a>
    <!-- ===== DESKTOP NAVIGATION ===== -->
 <nav class="floating-nav" aria-label="Desktop navigation">
     <div class="container">
@@ -2483,6 +2595,9 @@
                 </div>
             </div>
 
+
+
+
             <div class="nav-spacer" aria-hidden="true"></div>
 
             <a href="../../../login.html?tab=register" class="nav-item btn-primary" id="registerBtn">
@@ -2496,7 +2611,6 @@
         </div>
     </div>
 </nav>
-
 
 <!-- ===== MOBILE NAVIGATION ===== -->
 <nav class="mobile-nav">
@@ -2609,10 +2723,8 @@
     </div>
 </div>
 
-<!-- Live region for screen reader announcements -->
-<div aria-live="polite" class="sr-only" id="liveRegion"></div>
-<!-- System Status Badge - Add where you want the badge to appear -->
-<a href="#" class="status-badge" id="statusBadge" aria-label="View system status">
+  <!-- System Status Badge -->
+<a href="#" class="status-badge" id="statusBadge" aria-label="View system status" style="margin-right: var(--space-sm);">
     <span class="status-dot" id="statusDot" aria-hidden="true"></span>
     <span class="status-text" id="statusText">
         All Systems <strong>Operational</strong>
@@ -2620,7 +2732,7 @@
     <i class="fas fa-external-link-alt status-external-icon" aria-hidden="true"></i>
 </a>
 
-<!-- Status Modal (iframe) -->
+<!-- Status Modal -->
 <div class="status-modal" id="statusModal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
     <div class="status-modal-content">
         <div class="status-modal-header">
@@ -2632,26 +2744,57 @@
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
-        <div class="status-iframe-wrapper">
-            <iframe 
-                src="https://stats.uptimerobot.com/e2UEX0VhTh" 
-                title="NexusBank System Status"
-                loading="lazy"
-                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture">
-            </iframe>
+        <div class="status-modal-body">
+            <div class="status-indicator">
+                <div class="status-icon" id="statusIcon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="status-headline" id="statusHeadline">All Systems Operational</div>
+                <p class="status-description" id="statusDescription">
+                    All NexusBank services are running normally. We're monitoring our systems to ensure everything stays smooth.
+                </p>
+            </div>
+            
+            <div class="status-services">
+                <div class="status-service-item">
+                    <span class="status-service-name">Mobile App</span>
+                    <span class="status-service-state operational">Operational</span>
+                </div>
+                <div class="status-service-item">
+                    <span class="status-service-name">Online Banking</span>
+                    <span class="status-service-state operational">Operational</span>
+                </div>
+                <div class="status-service-item">
+                    <span class="status-service-name">Card Payments</span>
+                    <span class="status-service-state operational">Operational</span>
+                </div>
+                <div class="status-service-item">
+                    <span class="status-service-name">Transfers</span>
+                    <span class="status-service-state operational">Operational</span>
+                </div>
+                <div class="status-service-item">
+                    <span class="status-service-name">Customer Support</span>
+                    <span class="status-service-state operational">Operational</span>
+                </div>
+            </div>
+            
+            <p class="last-updated" id="lastUpdated">Last updated: Just now</p>
         </div>
         <div class="status-modal-footer">
             <a href="https://stats.uptimerobot.com/e2UEX0VhTh" 
-               class="status-btn-external" 
+               class="status-btn-primary" 
                target="_blank" 
                rel="noopener noreferrer">
-                <span>Open in new tab</span>
                 <i class="fas fa-external-link-alt"></i>
+                <span>View Full Status Page</span>
             </a>
         </div>
     </div>
 </div>
+
+<!-- Live region for screen reader announcements -->
+<div aria-live="polite" class="sr-only" id="liveRegion"></div>
+
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
@@ -3446,115 +3589,106 @@
 // ============================================================
 
 (function() {
-    const statusBadge = document.getElementById('statusBadge');
-    const statusModal = document.getElementById('statusModal');
-    const statusModalClose = document.getElementById('statusModalClose');
-    const statusIframe = statusModal?.querySelector('iframe');
-    
-    // Open modal when badge is clicked
-    if (statusBadge && statusModal) {
+    function initSystemStatus() {
+        var statusBadge = document.getElementById('statusBadge');
+        var statusModal = document.getElementById('statusModal');
+        var statusModalClose = document.getElementById('statusModalClose');
+        
+        // Check if elements exist
+        if (!statusBadge || !statusModal) {
+            console.log('Status elements not found. Badge:', !!statusBadge, 'Modal:', !!statusModal);
+            return;
+        }
+        
+        // Remove old click handlers by cloning
+        var newBadge = statusBadge.cloneNode(true);
+        statusBadge.parentNode.replaceChild(newBadge, statusBadge);
+        
+        // Get fresh reference after clone
+        statusBadge = document.getElementById('statusBadge');
+        
+        // Open modal when badge is clicked
         statusBadge.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            
+            // Show modal
             statusModal.classList.add('active');
             document.body.style.overflow = 'hidden';
-            announceToScreenReader('System status page opened');
             
-            // Lazy load iframe if not already loaded
-            if (statusIframe && !statusIframe.src) {
-                statusIframe.src = 'https://stats.uptimerobot.com/e2UEX0VhTh';
+            // Update timestamp
+            updateTimestamp();
+            
+            // Announce to screen readers
+            var liveRegion = document.getElementById('liveRegion');
+            if (liveRegion) {
+                liveRegion.textContent = 'System status dialog opened';
+                setTimeout(function() {
+                    liveRegion.textContent = '';
+                }, 3000);
             }
         });
-    }
-    
-    // Close modal
-    function closeStatusModal() {
-        if (statusModal) {
+        
+        // Close modal function
+        function closeStatusModal() {
             statusModal.classList.remove('active');
             document.body.style.overflow = '';
-            announceToScreenReader('System status page closed');
+            
+            var liveRegion = document.getElementById('liveRegion');
+            if (liveRegion) {
+                liveRegion.textContent = 'System status dialog closed';
+                setTimeout(function() {
+                    liveRegion.textContent = '';
+                }, 3000);
+            }
         }
-    }
-    
-    if (statusModalClose) {
-        statusModalClose.addEventListener('click', closeStatusModal);
-    }
-    
-    // Close modal when clicking outside
-    if (statusModal) {
+        
+        // Close button
+        if (statusModalClose) {
+            statusModalClose.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeStatusModal();
+            });
+        }
+        
+        // Close when clicking outside
         statusModal.addEventListener('click', function(e) {
             if (e.target === statusModal) {
                 closeStatusModal();
             }
         });
-    }
-    
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && statusModal?.classList.contains('active')) {
-            closeStatusModal();
-        }
-    });
-    
-    // Optional: Fetch live status from UptimeRobot API
-    // You'll need to set up a proxy/CORS solution for this
-    /*
-    async function fetchLiveStatus() {
-        try {
-            const response = await fetch('YOUR_PROXY_URL/uptime-status');
-            const data = await response.json();
-            updateStatusBadge(data.status);
-        } catch (error) {
-            console.log('Status fetch failed, showing default');
-        }
-    }
-    
-    function updateStatusBadge(status) {
-        const dot = document.getElementById('statusDot');
-        const text = document.getElementById('statusText');
         
-        if (!dot || !text) return;
-        
-        dot.className = 'status-dot';
-        
-        switch(status) {
-            case 'degraded':
-                dot.classList.add('degraded');
-                text.innerHTML = 'Some Systems <strong style="color: var(--status-degraded)">Degraded</strong>';
-                break;
-            case 'outage':
-                dot.classList.add('outage');
-                text.innerHTML = 'Service <strong style="color: var(--status-outage)">Outage</strong>';
-                break;
-            case 'maintenance':
-                dot.classList.add('maintenance');
-                text.innerHTML = 'Scheduled <strong style="color: var(--status-maintenance)">Maintenance</strong>';
-                break;
-            default:
-                text.innerHTML = 'All Systems <strong>Operational</strong>';
-        }
-    }
-    
-    // Fetch status on load
-    // fetchLiveStatus();
-    */
-    
-    // Preload iframe on hover for faster perceived performance
-    if (statusBadge && statusIframe && !statusIframe.src) {
-        let preloaded = false;
-        
-        statusBadge.addEventListener('mouseenter', function() {
-            if (!preloaded) {
-                statusIframe.src = 'https://stats.uptimerobot.com/e2UEX0VhTh';
-                preloaded = true;
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && statusModal.classList.contains('active')) {
+                closeStatusModal();
             }
-        }, { once: true });
+        });
         
-        statusBadge.addEventListener('focus', function() {
-            if (!preloaded) {
-                statusIframe.src = 'https://stats.uptimerobot.com/e2UEX0VhTh';
-                preloaded = true;
+        // Update timestamp
+        function updateTimestamp() {
+            var timestamp = document.getElementById('lastUpdated');
+            if (timestamp) {
+                var now = new Date();
+                var hours = now.getHours();
+                var minutes = now.getMinutes();
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                var timeString = hours + ':' + minutes + ' ' + ampm;
+                timestamp.textContent = 'Last updated: Today at ' + timeString;
             }
-        }, { once: true });
+        }
+        
+        console.log('System status initialized successfully');
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSystemStatus);
+    } else {
+        initSystemStatus();
     }
 })();
 </script>

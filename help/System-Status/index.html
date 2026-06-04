@@ -2016,6 +2016,58 @@
         font-size: 0.8rem;
     }
 }
+/* ===== SYSTEM STATUS INDICATOR ===== */
+.system-status-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.system-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.system-status.online {
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.system-status.down {
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.system-status.unknown {
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
 </style>
 </head>
 <body>
@@ -2354,6 +2406,12 @@
 <!-- Live region for screen reader announcements -->
 <div aria-live="polite" class="sr-only" id="liveRegion"></div>
 
+<div class="system-status-container">
+    <div class="system-status" id="systemStatus">
+        <span class="status-dot"></span>
+        <span id="statusText">Checking system status...</span>
+    </div>
+</div>
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
@@ -3143,6 +3201,54 @@
         }     
         console.log('✅ All bugs fixed! Icons-only mode dropdowns now work with clicks!');
     });
+    // ===== SYSTEM STATUS CHECKER =====
+async function checkSystemStatus() {
+    const apiKey = "u3533560-c8b9a16955897d2f4cadf75a";
+    const statusElement = document.getElementById('systemStatus');
+    const statusText = document.getElementById('statusText');
+    
+    if (!statusElement || !statusText) return;
+    
+    try {
+        const res = await fetch("https://api.uptimerobot.com/v2/getMonitors", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                api_key: apiKey,
+                format: "json"
+            })
+        });
+        
+        const data = await res.json();
+        const monitor = data.monitors[0];
+        
+        // Remove all status classes
+        statusElement.classList.remove('online', 'down', 'unknown');
+        
+        if (monitor.status === 2) {
+            statusText.textContent = "All Systems Operational";
+            statusElement.classList.add('online');
+        } else if (monitor.status === 9) {
+            statusText.textContent = "System Down";
+            statusElement.classList.add('down');
+        } else {
+            statusText.textContent = "Status Unknown";
+            statusElement.classList.add('unknown');
+        }
+    } catch (error) {
+        console.error('Status check failed:', error);
+        statusText.textContent = "Unable to check status";
+        statusElement.classList.add('unknown');
+    }
+}
+
+// Initial check
+checkSystemStatus();
+
+// Check every 60 seconds
+setInterval(checkSystemStatus, 60000);
 </script>
 </body>
 </html>

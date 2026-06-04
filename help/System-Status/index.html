@@ -53,6 +53,10 @@
             --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-bounce: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --status-operational: #10b981;
+--status-degraded: #f59e0b;
+--status-outage: #ef4444;
+--status-maintenance: #6366f1;
         }
 
         * {
@@ -2016,62 +2020,263 @@
         font-size: 0.8rem;
     }
 }
-/* ===== SYSTEM STATUS INDICATOR ===== */
-.system-status-container {
-    display: flex;
+/* ===== SYSTEM STATUS COMPONENT ===== */
+.status-badge {
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.system-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-full);
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: all var(--transition-fast);
-}
-
-.system-status.online {
-    color: var(--success);
-    border-color: rgba(16, 185, 129, 0.3);
     background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    font-family: var(--font-body);
 }
 
-.system-status.down {
-    color: var(--error);
-    border-color: rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.system-status.unknown {
-    color: var(--warning);
-    border-color: rgba(245, 158, 11, 0.3);
-    background: rgba(245, 158, 11, 0.1);
+.status-badge:hover {
+    background: rgba(16, 185, 129, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
 }
 
 .status-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: currentColor;
-    animation: pulse-dot 2s infinite;
+    background: var(--status-operational);
+    animation: statusPulse 2s ease-in-out infinite;
+    flex-shrink: 0;
 }
 
-@keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+.status-dot.degraded {
+    background: var(--status-degraded);
+    animation: statusPulseWarning 2s ease-in-out infinite;
+}
+
+.status-dot.outage {
+    background: var(--status-outage);
+    animation: statusPulseError 1.5s ease-in-out infinite;
+}
+
+.status-dot.maintenance {
+    background: var(--status-maintenance);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+
+@keyframes statusPulseWarning {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+}
+
+@keyframes statusPulseError {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+
+.status-text {
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.status-text strong {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.status-external-icon {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    transition: transform var(--transition-fast);
+}
+
+.status-badge:hover .status-external-icon {
+    transform: translate(2px, -2px);
+    color: var(--primary);
+}
+
+/* Status Modal */
+.status-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+    padding: var(--space-lg);
+}
+
+.status-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.status-modal-content {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 900px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-2xl);
+    overflow: hidden;
+}
+
+.status-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.status-modal-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.status-modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: 1rem;
+}
+
+.status-modal-close:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.status-iframe-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    min-height: 500px;
+}
+
+.status-iframe-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    inset: 0;
+}
+
+.status-modal-footer {
+    padding: var(--space-md) var(--space-xl);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+}
+
+.status-btn-external {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.status-btn-external:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    border-color: var(--primary);
+}
+
+.status-btn-external i {
+    font-size: 0.75rem;
+}
+
+/* Mobile status adjustments */
+@media (max-width: 768px) {
+    .status-modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    .status-modal-content {
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        max-height: 90vh;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .status-modal-header {
+        padding: var(--space-md) var(--space-lg);
+    }
+    
+    .status-iframe-wrapper {
+        min-height: 400px;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-iframe-wrapper {
+        min-height: 350px;
+    }
+    
+    .status-modal-header {
+        padding: var(--space-md);
+    }
+    
+    .status-modal-title {
+        font-size: 1rem;
+    }
 }
 </style>
 </head>
 <body>
 
+    <!-- Add this BEFORE the nav-spacer in the floating nav -->
+<a href="#" class="status-badge" id="statusBadge" style="margin-right: var(--space-sm);">
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-text" id="statusText">
+        <span>All Systems</span>
+        <strong>Operational</strong>
+    </span>
+</a>
    <!-- ===== DESKTOP NAVIGATION ===== -->
 <nav class="floating-nav" aria-label="Desktop navigation">
     <div class="container">
@@ -2292,6 +2497,7 @@
     </div>
 </nav>
 
+
 <!-- ===== MOBILE NAVIGATION ===== -->
 <nav class="mobile-nav">
     <a href="../../../index.html" class="nav-brand">
@@ -2405,11 +2611,45 @@
 
 <!-- Live region for screen reader announcements -->
 <div aria-live="polite" class="sr-only" id="liveRegion"></div>
+<!-- System Status Badge - Add where you want the badge to appear -->
+<a href="#" class="status-badge" id="statusBadge" aria-label="View system status">
+    <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+    <span class="status-text" id="statusText">
+        All Systems <strong>Operational</strong>
+    </span>
+    <i class="fas fa-external-link-alt status-external-icon" aria-hidden="true"></i>
+</a>
 
-<div class="system-status-container">
-    <div class="system-status" id="systemStatus">
-        <span class="status-dot"></span>
-        <span id="statusText">Checking system status...</span>
+<!-- Status Modal (iframe) -->
+<div class="status-modal" id="statusModal" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
+    <div class="status-modal-content">
+        <div class="status-modal-header">
+            <div class="status-modal-title" id="statusModalTitle">
+                <span class="status-dot" aria-hidden="true"></span>
+                System Status
+            </div>
+            <button class="status-modal-close" id="statusModalClose" aria-label="Close status page">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="status-iframe-wrapper">
+            <iframe 
+                src="https://stats.uptimerobot.com/e2UEX0VhTh" 
+                title="NexusBank System Status"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture">
+            </iframe>
+        </div>
+        <div class="status-modal-footer">
+            <a href="https://stats.uptimerobot.com/e2UEX0VhTh" 
+               class="status-btn-external" 
+               target="_blank" 
+               rel="noopener noreferrer">
+                <span>Open in new tab</span>
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+        </div>
     </div>
 </div>
 <!-- Footer -->
@@ -3201,54 +3441,122 @@
         }     
         console.log('✅ All bugs fixed! Icons-only mode dropdowns now work with clicks!');
     });
-    // ===== SYSTEM STATUS CHECKER =====
-async function checkSystemStatus() {
-    const apiKey = "u3533560-c8b9a16955897d2f4cadf75a";
-    const statusElement = document.getElementById('systemStatus');
-    const statusText = document.getElementById('statusText');
+    // ============================================================
+// SYSTEM STATUS FUNCTIONALITY
+// ============================================================
+
+(function() {
+    const statusBadge = document.getElementById('statusBadge');
+    const statusModal = document.getElementById('statusModal');
+    const statusModalClose = document.getElementById('statusModalClose');
+    const statusIframe = statusModal?.querySelector('iframe');
     
-    if (!statusElement || !statusText) return;
-    
-    try {
-        const res = await fetch("https://api.uptimerobot.com/v2/getMonitors", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: new URLSearchParams({
-                api_key: apiKey,
-                format: "json"
-            })
+    // Open modal when badge is clicked
+    if (statusBadge && statusModal) {
+        statusBadge.addEventListener('click', function(e) {
+            e.preventDefault();
+            statusModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            announceToScreenReader('System status page opened');
+            
+            // Lazy load iframe if not already loaded
+            if (statusIframe && !statusIframe.src) {
+                statusIframe.src = 'https://stats.uptimerobot.com/e2UEX0VhTh';
+            }
         });
-        
-        const data = await res.json();
-        const monitor = data.monitors[0];
-        
-        // Remove all status classes
-        statusElement.classList.remove('online', 'down', 'unknown');
-        
-        if (monitor.status === 2) {
-            statusText.textContent = "All Systems Operational";
-            statusElement.classList.add('online');
-        } else if (monitor.status === 9) {
-            statusText.textContent = "System Down";
-            statusElement.classList.add('down');
-        } else {
-            statusText.textContent = "Status Unknown";
-            statusElement.classList.add('unknown');
-        }
-    } catch (error) {
-        console.error('Status check failed:', error);
-        statusText.textContent = "Unable to check status";
-        statusElement.classList.add('unknown');
     }
-}
-
-// Initial check
-checkSystemStatus();
-
-// Check every 60 seconds
-setInterval(checkSystemStatus, 60000);
+    
+    // Close modal
+    function closeStatusModal() {
+        if (statusModal) {
+            statusModal.classList.remove('active');
+            document.body.style.overflow = '';
+            announceToScreenReader('System status page closed');
+        }
+    }
+    
+    if (statusModalClose) {
+        statusModalClose.addEventListener('click', closeStatusModal);
+    }
+    
+    // Close modal when clicking outside
+    if (statusModal) {
+        statusModal.addEventListener('click', function(e) {
+            if (e.target === statusModal) {
+                closeStatusModal();
+            }
+        });
+    }
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && statusModal?.classList.contains('active')) {
+            closeStatusModal();
+        }
+    });
+    
+    // Optional: Fetch live status from UptimeRobot API
+    // You'll need to set up a proxy/CORS solution for this
+    /*
+    async function fetchLiveStatus() {
+        try {
+            const response = await fetch('YOUR_PROXY_URL/uptime-status');
+            const data = await response.json();
+            updateStatusBadge(data.status);
+        } catch (error) {
+            console.log('Status fetch failed, showing default');
+        }
+    }
+    
+    function updateStatusBadge(status) {
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        
+        if (!dot || !text) return;
+        
+        dot.className = 'status-dot';
+        
+        switch(status) {
+            case 'degraded':
+                dot.classList.add('degraded');
+                text.innerHTML = 'Some Systems <strong style="color: var(--status-degraded)">Degraded</strong>';
+                break;
+            case 'outage':
+                dot.classList.add('outage');
+                text.innerHTML = 'Service <strong style="color: var(--status-outage)">Outage</strong>';
+                break;
+            case 'maintenance':
+                dot.classList.add('maintenance');
+                text.innerHTML = 'Scheduled <strong style="color: var(--status-maintenance)">Maintenance</strong>';
+                break;
+            default:
+                text.innerHTML = 'All Systems <strong>Operational</strong>';
+        }
+    }
+    
+    // Fetch status on load
+    // fetchLiveStatus();
+    */
+    
+    // Preload iframe on hover for faster perceived performance
+    if (statusBadge && statusIframe && !statusIframe.src) {
+        let preloaded = false;
+        
+        statusBadge.addEventListener('mouseenter', function() {
+            if (!preloaded) {
+                statusIframe.src = 'https://stats.uptimerobot.com/e2UEX0VhTh';
+                preloaded = true;
+            }
+        }, { once: true });
+        
+        statusBadge.addEventListener('focus', function() {
+            if (!preloaded) {
+                statusIframe.src = 'https://stats.uptimerobot.com/e2UEX0VhTh';
+                preloaded = true;
+            }
+        }, { once: true });
+    }
+})();
 </script>
 </body>
 </html>
